@@ -1,6 +1,11 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
+struct Prot {
+    string id;
+    string sequence;
+};
+
 // fonction qui permet d'afficher sur le terminal les id suivi des sequence de tout les éléments d'un fichier fasta
 void printfastafile(string files){
     ifstream fichier(files);
@@ -30,7 +35,7 @@ void printfastafile(string files){
 }
 
 // fonction qui permet de récupérer l'id et le sequence d'un fichier Fasta ne contenant qu'UN SEUL élement comme P00533.fasta
-pair<string,string> getIdandsequence(string files){
+Prot getIdandsequence(string files){
     ifstream fichier(files);
     if (!fichier.good()) {
         std::cerr << "fichier non ouvert" << std::endl;
@@ -48,13 +53,14 @@ pair<string,string> getIdandsequence(string files){
             sequence += ligne;     // on actualise le sequence car elle peut prendre plusieurs lignes
         }
     }
-    return {id,sequence};
+    Prot query;
+    query.id = id;
+    query.sequence = sequence;
+    return query;
 }
 
 int main(int argc, char **argv){
     // printfastafile(argv[1]);
-    pair<string,string> donne = getIdandsequence(argv[1]);
-    string id = donne.first;
-    string sequence = donne.second;
+    Prot query = getIdandsequence(argv[1]);
     return 0;
 }
