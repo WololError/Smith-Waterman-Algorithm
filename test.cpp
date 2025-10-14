@@ -30,6 +30,7 @@ Offsets read_offsets(const string& pin_path) {
     file.read(reinterpret_cast<char*>(&db_type), 4);
 
     file.read(reinterpret_cast<char*>(&title_len), 4);
+    title_len = swap(title_len);
     file.seekg(title_len, ios::cur);
 
     file.read(reinterpret_cast<char*>(&timestamp_len), 4);
@@ -66,5 +67,5 @@ Offsets read_offsets(const string& pin_path) {
 
 int main() {
     Offsets datapin = read_offsets("database/uniprot_sprot.fasta.pin");
-    cout << datapin.numberOfprot << endl ;
+    cout << datapin.numberOfprot << endl;
 }
