@@ -15,5 +15,11 @@ blosum/
 /projet
 /projetopt
 
+# .txt files
+/results.txt
+
 # Object files
 *.o
+
+# .exe files
+*.exe
