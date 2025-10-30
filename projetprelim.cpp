@@ -14,18 +14,18 @@ int main(int argc, char** argv){
 
     Prot query = getIdandsequence(fastafile);
     dataPin pindata = read_pin(pinfile);
-    cout << pindata.numberOfprot << endl;
+    //cout << pindata.numberOfprot << endl;
      string seq;
-     auto start = std::chrono::high_resolution_clock::now();
+     //auto start = std::chrono::high_resolution_clock::now();
      for(int i = 0; i < pindata.sequence_offsets.size() - 1 ; i++){
 
          seq = read_sequence(psqfile, pindata.sequence_offsets[i], pindata.sequence_offsets[i + 1]);
          if (seq == query.sequence){
-             cout << "protein Trouvee !" << " i = " << i << endl;
+             //cout << "protein Trouvee !" << " i = " << i << endl;
              cout << read_header(phrfile,pindata.header_offsets[i],pindata.header_offsets[i + 1]) << endl;
-             auto end = std::chrono::high_resolution_clock::now();
-             std::chrono::duration<double> elapsed = end - start;
-             std::cout << "Temps ecoule : " << elapsed.count() << " secondes\n";
+             //auto end = std::chrono::high_resolution_clock::now();
+             //std::chrono::duration<double> elapsed = end - start;
+             //std::cout << "Temps ecoule : " << elapsed.count() << " secondes\n";
              break;
        }
     }
