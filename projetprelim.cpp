@@ -14,7 +14,7 @@ int main(int argc, char** argv){
 
     Prot query = getIdandsequence(fastafile);
     dataPin pindata = read_pin(pinfile);
-    cout << pindata.numberOfprot << endl;
+    // cout << pindata.numberOfprot << endl;
     string seq;
     auto start = std::chrono::high_resolution_clock::now();
     ifstream file(psqfile, ios::binary);
@@ -27,7 +27,7 @@ int main(int argc, char** argv){
             cout << read_header(phrfile, pindata.header_offsets[i],pindata.header_offsets[i + 1]) << endl;
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = end - start;
-            std::cout << "Temps ecoule : " << elapsed.count() << " secondes\n";
+            // std::cout << "Temps ecoule : " << elapsed.count() << " secondes\n";
             break;
         }
     }
