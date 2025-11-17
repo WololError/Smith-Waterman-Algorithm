@@ -53,6 +53,7 @@ dataPin read_pin(const string& filepin) {
     //on lit le nb de séquence et on l'inverse pr le récuperer plus tard
     file.read(reinterpret_cast<char*>(&n_sequences), 4);
     n_sequences = swap(n_sequences);
+
     //on skip le nb de résidue qui est encodé sur 64bits, il ne nous servira pas
     int64_t residue_count;
     file.read(reinterpret_cast<char*>(&residue_count), 8);
