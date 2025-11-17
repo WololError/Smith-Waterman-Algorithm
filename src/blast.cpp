@@ -47,8 +47,7 @@ dataPin read_pin(const string& filepin) {
     //selon la documentation officiel, des bytes NULL sont ajouté de sorte que le nombre de séquence 
     //commence à une offset multiple de 8 ce qui "augmente" le nb de bytes à skippe, 
     //on calcule donc ce nb de bytes NULL (padding) puis on skip jusqu'au nb de séquence avec seekg
-    int padding = (8 - (timestamp_len % 8)) % 8;
-    file.seekg(timestamp_len + padding, ios::cur);
+    file.seekg(timestamp_len, ios::cur);
 
     //on lit le nb de séquence et on l'inverse pr le récuperer plus tard
     file.read(reinterpret_cast<char*>(&n_sequences), 4);
