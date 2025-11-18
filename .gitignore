@@ -14,10 +14,9 @@ blosum/
 /projetprelim
 /projet
 /projetopt
-/.vscode/
+/.vscode
 
-*.vscode/
-
+*.vscode
 # .txt files
 /results.txt
 

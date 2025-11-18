@@ -5,7 +5,7 @@ query getIdandsequence(const string& filefasta){
     ifstream fichier(filefasta);
     
     if (!fichier.good()) {
-        std::cerr << "fichier non ouvert" << std::endl;
+        std::cerr << "fichier fasta non ouvert" << std::endl;
         return {"",""};
     }
 
