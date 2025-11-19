@@ -5,7 +5,7 @@ projetprelim: projetprelim.cpp
 	./projetprelim query/P00533.fasta database/uniprot_sprot.fasta
 
 projet: projet.cpp
-	g++ projet.cpp src/fasta.cpp src/blast.cpp src/blosum.cpp -o projet
+	g++ projet.cpp src/*.cpp -o projet
 	./projet query/P00533.fasta database/uniprot_sprot.fasta blosum/BLOSUM62 11 1
 
 projetopt:

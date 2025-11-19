@@ -19,6 +19,10 @@ public:
     string getseq() const;
     string getid() const;
     
+    bool operator< (const Protein &other) const {
+        return sw_score < other.sw_score;
+    }
+    
 };
 
 #endif
