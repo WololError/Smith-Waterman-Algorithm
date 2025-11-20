@@ -2,6 +2,8 @@
 
 pair<string, string> GetProtGapped(vector<vector<int>>& H, const query& query, const Protein& prot, const Blosum& blosum, int i, int j, int gap_penalty)
 {
+    /*Cette fonction permet de print les alignements avec les tirets qui représentent les gaps, permet principalement de debugger*/
+
     // Traceback du meilleur alignement, i et j correspondent au max.
     string rev_on_query; // On stocke les caractères en ordre inverse
     string rev_on_prot;
@@ -46,6 +48,8 @@ pair<string, string> GetProtGapped(vector<vector<int>>& H, const query& query, c
 int SWmatrix(const query& query, 
 	const Protein& prot, Blosum& blosum, const int gap_open_penalty, const int gap_extension_penalty)
 {
+    /*Renvoie le score maximal d'alignement de la protéine à comparer grâce à l'algorithme de Smith-Waterman*/
+
 	// Init de 0 dans toute la matrice (ajout d'une ligne et d'une colonne supp.)
 	int prot_len = prot.sequence.size();
     int query_len = query.sequence.size();
@@ -90,7 +94,7 @@ int SWmatrix(const query& query,
 vector<Protein> Top20Prot(vector<Protein>& proteins, 
 	const query& query, Blosum& blosum, const int gap_open_penalty, const int gap_extension_penalty)
 {
-
+    /*Retourne les 20 meilleurs protéines dans un vecteur de Protein*/
 	vector<Protein> bestprots;
     Protein init_prot;
     bestprots.push_back(init_prot);
