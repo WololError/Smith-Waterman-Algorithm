@@ -64,7 +64,7 @@ int SWmatrix(const query& query,
 	int gap_penalty = gap_open_penalty + gap_extension_penalty; // JSP s'il faut ajouter malus si le gap est plus grand
 
     // Double boucle créant la matrice sw
-    cout << prot.sequence << endl;
+    //cout << prot.sequence << endl;
     for (i = 1;  i <= query_len; i++)
 	{
 		for (j = 1; j <= prot_len; j++)
