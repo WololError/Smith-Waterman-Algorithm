@@ -42,7 +42,7 @@ priority_queue<Protein> Protein::initProtqueue(const query& q, Blosum& blosum, s
     
     priority_queue<Protein> pq;
 
-    for(int i = 0; i < pin.sequence_offsets.size() ; i++){
+    for(int i = 0; i < pin.sequence_offsets.size() - 1 ; i++){
         
         Protein P;
         P.id = read_header(phr, pin.header_offsets[i],pin.header_offsets[i + 1]);
