@@ -22,7 +22,7 @@ int main(int argc, char** argv){
     query query = getIdandsequence(fastafile);
     dataPin pindata = read_pin(pinfile);
     Blosum scoring(blosumfile);
-    // vector<Protein> proteins = Protein::initProtlist(phrfile, psqfile, pindata); 
+    vector<Protein> proteins = Protein::initProtlist(phrfile, psqfile, pindata); 
 
     /*
     Protein fake_prot;
