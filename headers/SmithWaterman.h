@@ -13,7 +13,4 @@ using namespace std;
 int SWmatrix(const query& query, 
 	const Protein& prot, Blosum& blosum, const int gap_open_penalty, const int gap_extension);
 
-vector<Protein> Top20Prot(vector<Protein>& proteins, 
-	const query& query, Blosum& blosum, const int gap_open_penalty, const int gap_extension_penalty);
-
 #endif
