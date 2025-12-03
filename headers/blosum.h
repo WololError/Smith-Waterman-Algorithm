@@ -21,14 +21,16 @@ private:
     unordered_map<char, int> indexMap;
     int parseBlosumSize(const string& blosumfile) const;
     unordered_map<char, int> parseIndexMap(const string& blosumfile) const;
+    static vector<int> linetovector(string& line, int number);
 ;
 public:
     Blosum(const string& blosumfile);
     int Score(char acide1, char acide2) const;
     void printMatrix() const;
     void printIndexMap() const;
+    
 };
 
-vector<int> linetovector(string& line, int number);
+
 
 #endif

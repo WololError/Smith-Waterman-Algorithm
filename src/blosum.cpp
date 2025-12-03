@@ -74,7 +74,7 @@ unordered_map<char, int> Blosum::parseIndexMap(const string& blosumfile) const{
     return map;
 }
 
-vector<int> linetovector(string& line, int number) {
+vector<int> Blosum::linetovector(string& line, int number) {
     vector<int> vec(number);
     int minus = -1;
 

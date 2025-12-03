@@ -47,42 +47,43 @@ pair<string, string> GetProtGapped(vector<vector<int>>& H, const query& query, c
     return {rev_on_query, rev_on_prot};
 }
 
+#include "../headers/SmithWaterman.h"
+#include <iomanip>
+
 int SWmatrix(const query& query, const Protein& prot,const Blosum& blosum, const int GOP, const int GEP) {
     
     string prot_sequence = prot.getseq();
     int prot_len = prot_sequence.size();
     int query_len = query.sequence.size();
     
-    vector<int> H_prev(query_len + 1, 0); 
-    vector<int> H_curr(query_len + 1, 0); 
-    vector<int> E_curr(query_len + 1, 0);
+    vector<int> H((query_len + 1)*(prot_len + 1), 0); 
+    vector<int> F = H;
+    vector<int> E = H;
     
     int max_score = 0;
-
-    for (int j = 1; j <= prot_len; j++)
+    int i_curr, i_left, i_up;
+    
+    for (int i = 1; i <= query_len; i++)
     {
-        int F_curr = 0; 
-        
-        H_curr[0] = 0;
-        E_curr[0] = 0;
-        
-        for (int i = 1; i <= query_len; i++)
+        for (int j = 1; j <= prot_len; j++)
         {
-            E_curr[i] = max(H_curr[i] - GOP - GEP, E_curr[i] - GEP);
+            i_curr = i*(prot_len+1) + j;
+            i_left = i*(prot_len+1) + (j-1);
+            i_up = (i-1)*(prot_len+1) + j;
             
-            F_curr = max(H_prev[i] - GOP - GEP, F_curr - GEP);
+            E[i_curr] = max(H[i_left] - GOP - GEP, E[i_left] - GEP);
             
-            H_curr[i] = max(0, 
-                max(H_prev[i-1] + blosum.Score(query.sequence[i-1], prot_sequence[j-1]), 
-                max(E_curr[i], F_curr)));
+            F[i_curr] = max(H[i_up] - GOP - GEP, F[i_up] - GEP);
+            
+            H[i_curr] = max(0, 
+                max(H[(i-1)*(prot_len+1) + (j-1)] + blosum.Score(query.sequence[i-1], prot_sequence[j-1]), 
+                max(E[i_curr], F[i_curr])));
 
-            if (H_curr[i] > max_score)
+            if (H[i_curr] > max_score)
             {
-                max_score = H_curr[i];
+                max_score = H[i_curr];
             }
         }
-        
-        H_prev = H_curr;
     }
     
     return max_score;

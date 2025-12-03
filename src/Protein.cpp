@@ -84,7 +84,6 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
         P.id = read_header(phr, pin.header_offsets[i], pin.header_offsets[i + 1]);
         P.sequence = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
         P.sw_score = SWmatrix(query, P, blosum, GEP, GOP);
-        cout << P.id << "  " << P.sw_score << endl;
         if (thread_results.size() < TOP_K) {
             thread_results.push(move(P));
         } else if (P.sw_score > thread_results.top().sw_score) {
@@ -105,7 +104,9 @@ vector<Protein> Protein::createVector(const string& phrfile, const string& psqfi
 
     for (unsigned int i = 0; i < num_threads; ++i) {
         int start_index = i * chunk_size;
-        int end_index = (i == num_threads - 1) ? total_proteins : (i + 1) * chunk_size;
+        int end_index;
+
+        if (i == num_threads - 1) { end_index = total_proteins; } else { end_index = start_index + chunk_size; }   
 
         if (start_index >= end_index) continue;
             
