@@ -1,5 +1,4 @@
 #include "../headers/SmithWaterman.h"
-#include <iomanip>
 
 int SWmatrix(const query& query, const Protein& prot,const Blosum& blosum, const int GOP, const int GEP) {
     
