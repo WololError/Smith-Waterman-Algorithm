@@ -2,15 +2,14 @@ all: projet
 
 projetprelim: projetprelim.cpp
 	g++ projetprelim.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp -o projetprelim
-	./projetprelim query/P00533.fasta database/uniprot_sprot.fasta
 
 projet: projet.cpp
-	g++ -O3 -march=native -mtune=native -funroll-loops -ffast-math \
-    projet.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp \
-    src/SmithWaterman.cpp src/blosum.cpp -o projet
+	g++ projet.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp src/SmithWaterman.cpp src/blosum.cpp -o projet
 
-projetopt:
-	@echo "Modifiez le fichier Makefile pour permettre la compilation de votre projet"
+projetopt: projetopt.cpp
+	g++ -O3 -march=native -mtune=native -funroll-loops -ffast-math \
+    projetopt.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp \
+    src/SmithWaterman.cpp src/blosum.cpp -o projet
 
 clean:
 	rm *.o

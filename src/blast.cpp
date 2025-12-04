@@ -1,6 +1,6 @@
 #include "../headers/blast.h"
 
-vector<char> Aminoacid = {'-', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z', 'U', '*', 'O', 'J'};
+static constexpr std::array<char, 29> Aminoacid = {'-', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z', 'U', '*', 'O', 'J'};
 
 //fonction qui inverse un entier sur 32bits vu que la plupart des données sont en big endian et que le processeur s'attend à du little endian
 uint32_t swap(uint32_t val) {
@@ -44,9 +44,6 @@ dataPin read_pin(const string& filepin) {
     file.read(reinterpret_cast<char*>(&timestamp_len), 4);
     timestamp_len = swap(timestamp_len);
 
-    //selon la documentation officiel, des bytes NULL sont ajouté de sorte que le nombre de séquence 
-    //commence à une offset multiple de 8 ce qui "augmente" le nb de bytes à skippe, 
-    //on calcule donc ce nb de bytes NULL (padding) puis on skip jusqu'au nb de séquence avec seekg
     file.seekg(timestamp_len, ios::cur);
 
     //on lit le nb de séquence et on l'inverse pr le récuperer plus tard
@@ -83,20 +80,21 @@ dataPin read_pin(const string& filepin) {
     return pindata;
 }
 
-string read_sequence(ifstream& file, const int a,const int b){
+string read_sequence(ifstream& file, int a, int b) {
     file.seekg(a, ios::beg);
-    int size = llabs(b - a) ;
+    int size = b - a;
+
     string sequence;
-    char byte;
-    int value;
+    sequence.reserve(size);
     //on lit byte par byte puis on convertie les valeurs en lettrez avec le vector Aminoacid
-    for(int i = 0; i < size - 1; i++){
-        file.read(&byte, 1);
-        value = static_cast<int>(static_cast<unsigned char>(byte));
-        sequence += Aminoacid[value];
+    for (int i = 0; i < size - 1; i++) {
+        unsigned char byte;
+        file.read(reinterpret_cast<char*>(&byte), 1);
+        sequence.push_back(Aminoacid[byte]);
     }
     return sequence;
 }
+
 
 //fonction qui lit le fichier phr et qui renvoie l'identifint de la prot entre l'offset a et b
 string read_header(ifstream& file, const int a, const int b) {

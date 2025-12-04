@@ -23,9 +23,9 @@ int main(int argc, char** argv){
     dataPin pindata = read_pin(pinfile);
     Blosum scoring(blosumfile);
     
-    vector<Protein> best20Prot = Protein::createVector(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
+    priority_queue<Protein> best20Prot = Protein::initProtqueue(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
 
-    Protein::printbetter(best20Prot);
+    Protein::print20best(best20Prot);
 
     return 0;
 }

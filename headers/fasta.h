@@ -10,7 +10,7 @@ using namespace std;
 //structure qui représente une protéine
 struct query {
     string id;
-    string sequence; //on stocke le séquence ds un string pr l'instant, reste à voir quelle structure sera intéressante pr l'algoritme de Smith-Waterman
+    string sequence;
 };
 
 query getIdandsequence(const string& files);

@@ -4,7 +4,7 @@ Blosum::Blosum(const string& blosumfile) {
     this->size = parseBlosumSize(blosumfile);
     this->indexMap = parseIndexMap(blosumfile);
 
-    this->matrix.resize(this->size, vector<int>(this->size));
+    this->matrix.resize(this->size * this->size);
 
     ifstream file(blosumfile);
     if (!file) throw runtime_error("Blosum() : impossible d'ouvrir le fichier");
@@ -19,7 +19,10 @@ Blosum::Blosum(const string& blosumfile) {
         }
         else {
             line[0] = ' ';
-            this->matrix[i] = linetovector(line);
+            vector<int> row = linetovector(line);
+            for (int j = 0; j < size; j++) {
+                this->matrix[i * size + j] = row[j];
+            }
             i++;
         }
     } 
@@ -35,7 +38,11 @@ int Blosum::Score(char acide1, char acide2) const {
     if (this->indexMap.count(acide2) == 0) {
         acide2 = '*';
     }
-    return this->matrix[this->indexMap.at(acide1)][this->indexMap.at(acide2)];
+
+    int i = indexMap.at(acide1);
+    int j = indexMap.at(acide2);
+
+    return matrix[i * size + j];
 }
 
 
@@ -77,7 +84,6 @@ unordered_map<char, int> Blosum::parseIndexMap(const string& blosumfile) const{
 
 vector<int> Blosum::linetovector(string& line) {
 
-
     istringstream iss(line);
 
     int num;
@@ -91,17 +97,10 @@ vector<int> Blosum::linetovector(string& line) {
 
 void Blosum::printMatrix() const {
     
-    for(int i = 0; i < this->size; ++i) {
-        for(int j = 0; j < this->size; ++j) {
-            cout << " " << this->matrix[i][j] << " ";
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            cout << " " << matrix[i * size + j] << " ";
         }
-        cout << endl;
-    }
+    cout << endl;
 }
-
-void Blosum::printIndexMap() const {
-    cout << "IndexMap contient " << this->indexMap.size() << " caractères:" << endl;
-    for (const auto& p : this->indexMap) {
-        cout << "'" << p.first << "' -> " << p.second << endl;
-    }
 }

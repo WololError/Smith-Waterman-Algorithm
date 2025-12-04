@@ -36,13 +36,13 @@ int Protein::getscore() const{
     return this->sw_score;
 }
 
-priority_queue<Protein> Protein::initProtqueue(const query& q, Blosum& blosum, string& phrfile, const string& psqfile, const dataPin& pin, int GEP, int GOP){
+priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP){
     
     ifstream phr(phrfile, ios::binary);
     if (!phr) throw runtime_error("Impossible d'ouvrir le fichier .phr");
 
     ifstream psq(psqfile, ios::binary);
-    if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .phr");
+    if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .psq");
     
     priority_queue<Protein> pq;
 
@@ -51,7 +51,7 @@ priority_queue<Protein> Protein::initProtqueue(const query& q, Blosum& blosum, s
         Protein P;
         P.id = read_header(phr, pin.header_offsets[i],pin.header_offsets[i + 1]);
         P.sequence = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
-        P.sw_score = SWmatrix(q, P, blosum, GOP, GEP);
+        P.sw_score = SWmatrix(query, P, blosum, GOP, GEP);
         pq.push(P);
     }
 
@@ -89,11 +89,10 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
     }
 }
 
-vector<Protein> Protein::createVector(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP) {
+priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP) {
     unsigned int num_threads = thread::hardware_concurrency();
     int total_proteins = pin.numberOfprot;
     int chunk_size = total_proteins / num_threads;
-    const int TOP_K = 20;
     
     vector<priority_queue<Protein>> all_thread_results(num_threads);
     vector<thread> workers;
@@ -114,25 +113,13 @@ vector<Protein> Protein::createVector(const string& phrfile, const string& psqfi
     }
 
     
-    priority_queue<Protein> final_pq = mergeQueues(all_thread_results, TOP_K);
+    priority_queue<Protein> final_pq = mergeQueues(all_thread_results);
     
-    vector<Protein> final_results;
-    while (!final_pq.empty()) {
-        final_results.push_back(final_pq.top());
-        final_pq.pop();
-    }
-    
-    return final_results;
+    return final_pq;
 }
 
-
-void Protein::printbetter(vector<Protein>& v){
-    for(int i = 0; i < 20 ; i++){
-        cout << v[i].getid() << " " << v[i].getscore() << endl;
-    }
-}
-
-priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein>>& all_queues, int top_k) {
+priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein>>& all_queues) {
+    
     priority_queue<Protein> final_pq;
     
     for (auto& thread_pq : all_queues) {
@@ -142,11 +129,5 @@ priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein>>& al
         }
     }
     
-    priority_queue<Protein> result;
-    for (int i = 0; i < top_k && !final_pq.empty(); ++i) {
-        result.push(final_pq.top());
-        final_pq.pop();
-    }
-    
-    return result;
+    return final_pq;
 }
