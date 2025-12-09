@@ -2,6 +2,7 @@
 #include "../headers/blast.h"
 #include "../headers/SmithWaterman.h"
 
+//initialise la liste des protéines à partir des fichiers .phr et .psq
 vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfile, const dataPin pin){
     
     ifstream phr(phrfile, ios::binary);
@@ -12,6 +13,7 @@ vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfi
 
     vector<Protein> proteins(pin.numberOfprot);
 
+	//lecture des protéines via les offsets
     for(int i = 0; i < pin.sequence_offsets.size() - 1 ; i++){
         string p  = read_header(phr, pin.header_offsets[i],pin.header_offsets[i + 1]);
         string seq = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
@@ -36,6 +38,7 @@ int Protein::getscore() const{
     return this->sw_score;
 }
 
+//initialise une priority_queue avec les protéines et leurs scores SW par rapport a une query
 priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP){
     
     ifstream phr(phrfile, ios::binary);
@@ -45,9 +48,9 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
     if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .psq");
     
     priority_queue<Protein> pq;
-
-    for(int i = 0; i < pin.sequence_offsets.size() - 1 ; i++){
-        
+	
+	//lecture de chaque protéine et calcul du score SW
+    for(int i = 0; i < pin.sequence_offsets.size() - 1 ; i++){    
         Protein P;
         P.id = read_header(phr, pin.header_offsets[i],pin.header_offsets[i + 1]);
         P.sequence = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
@@ -60,6 +63,7 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
     return pq;
 }
 
+//affiche les 20 meilleures protéines
 void Protein::print20best(priority_queue<Protein>& pq){
     for(int i = 0; i < 20 ; i++){
         const Protein& p = pq.top();
@@ -68,6 +72,7 @@ void Protein::print20best(priority_queue<Protein>& pq){
     }
 }
 
+//calcule les scores SW pour un intervalle de protéines pour le multithreading
 void Protein::computeSW(int start, int end, const query& query, const Blosum& blosum, const string& phrfile, const string& psqfile, const dataPin& pin, int GEP, int GOP, priority_queue<Protein>& thread_results) {
     const int TOP_K = 20;
     ifstream phr(phrfile, ios::binary);
@@ -75,11 +80,13 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
     ifstream psq(psqfile, ios::binary);
     if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .psq");
 
+	//parcours des protéines assignées a ce thread
     for (int i = start; i < end; ++i) {
         Protein P;
         P.id = read_header(phr, pin.header_offsets[i], pin.header_offsets[i + 1]);
         P.sequence = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
         P.sw_score = SWmatrix(query, P, blosum, GOP, GEP);
+        //on ne garde que les TOP_K protéines
         if (thread_results.size() < TOP_K) {
             thread_results.push(move(P));
         } else if (P.sw_score > thread_results.top().sw_score) {
@@ -89,6 +96,7 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
     }
 }
 
+//initialise une priority_queue avec les meilleurs score de SW en multithreading
 priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP) {
     unsigned int num_threads = thread::hardware_concurrency();
     int total_proteins = pin.numberOfprot;
@@ -97,6 +105,7 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
     vector<priority_queue<Protein>> all_thread_results(num_threads);
     vector<thread> workers;
 
+	//lancement d'un thread par portion de protéines
     for (unsigned int i = 0; i < num_threads; ++i) {
         int start_index = i * chunk_size;
         int end_index;
@@ -104,20 +113,21 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
         if (i == num_threads - 1) { end_index = total_proteins; } else { end_index = start_index + chunk_size; }   
 
         if (start_index >= end_index) continue;
-            
+        //création du thread pour cette portion   
         workers.emplace_back(&Protein::computeSW, start_index, end_index, cref(query), cref(blosum), phrfile, psqfile, cref(pin), GEP, GOP, ref(all_thread_results[i]));
     }
 
+	//attente de la fin des threads
     for (auto& worker : workers) {
         if (worker.joinable()) worker.join();
     }
 
-    
+    //fusion de toutes les queues 
     priority_queue<Protein> final_pq = mergeQueues(all_thread_results);
-    
     return final_pq;
 }
 
+//fusionne plusieurs priority_queue en une seule
 priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein>>& all_queues) {
     
     priority_queue<Protein> final_pq;
