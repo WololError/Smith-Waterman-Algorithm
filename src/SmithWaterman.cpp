@@ -20,9 +20,11 @@ int SWmatrix(const string& query_string, const Protein& prot,const Blosum& blosu
     int i_curr, i_left, i_up;
     
     //parcours de toutes les positions de la matrice
-    for (int i = 1; i <= query_len; i++)
+    int i = 1;
+    while (i <= query_len)
     {
-        for (int j = 1; j <= prot_len; j++)
+        int j = 1;
+        while (j <= prot_len)
         {
 			//indices dans la matrice
             i_curr = i*(prot_len+1) + j;
@@ -45,7 +47,9 @@ int SWmatrix(const string& query_string, const Protein& prot,const Blosum& blosu
             {
                 max_score = H[i_curr];
             }
+            j++;
         }
+        i++;
     }
     
     return max_score;

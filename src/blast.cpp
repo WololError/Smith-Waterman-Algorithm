@@ -89,9 +89,11 @@ void dataPin::read_pin(const string& filepin) {
               (n_sequences + 1) * 4);
 
     // on inverse pr les même raisons que title_len
-    for (int i = 0; i <= n_sequences; i++) {
+    int i = 0;
+    while (i <= n_sequences){
         this->header_offsets[i] = swap(this->header_offsets[i]);
         this->sequence_offsets[i] = swap(this->sequence_offsets[i]);
+        i++;
     }
 }
 
@@ -102,10 +104,12 @@ string read_sequence(ifstream& file, const int a,const int b){
     char byte;
     int value;
     //on lit byte par byte puis on convertie les valeurs en lettrez avec le vector Aminoacid
-    for(int i = 0; i < size - 1; i++){
+    int i = 0;
+    while (i < size - 1) {
         file.read(&byte, 1);
         value = static_cast<int>(static_cast<unsigned char>(byte));
         sequence.push_back(Aminoacid[value]);
+        i++;
     }
     return sequence;
 }
@@ -118,7 +122,8 @@ string read_header(ifstream& file, const int a, const int b) {
     file.read(reinterpret_cast<char*>(&buffer[0]), size);
 
     string header;
-    for (size_t i = 0; i < buffer.size(); i++) {
+    size_t i = 0;
+    while (i < buffer.size()) {
         if (buffer[i] == 0x1A) { // 0x1A = VisibleString
             // longueur du texte (1 octet)
             int length = buffer[i + 1];
@@ -128,6 +133,7 @@ string read_header(ifstream& file, const int a, const int b) {
             // on ajoute ce texte à la sortie
             header += text + " ";
         }
+        i++;
     }
     header = header.substr(0, header.find(' '));
     return header;

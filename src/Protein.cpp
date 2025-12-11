@@ -17,11 +17,13 @@ vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfi
     vector<uint32_t> header_offsets = pin.get_ho();
 
 	//lecture des protéines via les offsets
-    for(int i = 0; i < sequence_offsets.size() - 1 ; i++){
+    int i = 0;
+    while (i < sequence_offsets.size() - 1){
         string p  = read_header(phr, header_offsets[i],header_offsets[i + 1]);
         string seq = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
         proteins[i].id = p;
         proteins[i].sequence = seq;
+        i++;
     }
 
     phr.close();
@@ -56,12 +58,14 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
     vector<uint32_t> header_offsets = pin.get_ho();
 
 	//lecture de chaque protéine et calcul du score SW
-    for(int i = 0; i < sequence_offsets.size() - 1 ; i++){    
+    int i = 0;
+    while (i < sequence_offsets.size() - 1){    
         Protein P;
         P.id = read_header(phr, header_offsets[i],header_offsets[i + 1]);
         P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
         P.sw_score = SWmatrix(query.get_seq(), P, blosum, GOP, GEP);
         pq.push(P);
+        i++;
     }
 
     phr.close();
@@ -71,10 +75,12 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
 
 //affiche les 20 meilleures protéines
 void Protein::print20best(priority_queue<Protein>& pq){
-    for(int i = 0; i < 20 ; i++){
+    int i = 0;
+    while (i < 20){
         const Protein& p = pq.top();
         cout << p.id << " " << p.sw_score << endl;
         pq.pop();
+        i++;
     }
 }
 
@@ -90,7 +96,8 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
     vector<uint32_t> header_offsets = pin.get_ho();
 
 	//parcours des protéines assignées a ce thread
-    for (int i = start; i < end; ++i) {
+    int i = start;
+    while (i < end) {
         Protein P;
         P.id = read_header(phr, header_offsets[i], header_offsets[i + 1]);
         P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
@@ -102,6 +109,7 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
             thread_results.pop(); 
             thread_results.push(move(P));
         }
+        ++i;
     }
 }
 
@@ -115,7 +123,8 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
     vector<thread> workers;
 
 	//lancement d'un thread par portion de protéines
-    for (unsigned int i = 0; i < num_threads; ++i) {
+    unsigned int i = 0;
+    while (i < num_threads) {
         int start_index = i * chunk_size;
         int end_index;
 
@@ -124,6 +133,7 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
         if (start_index >= end_index) continue;
         //création du thread pour cette portion   
         workers.emplace_back(&Protein::computeSW, start_index, end_index, cref(query), cref(blosum), phrfile, psqfile, cref(pin), GEP, GOP, ref(all_thread_results[i]));
+        ++i;
     }
 
 	//attente de la fin des threads
