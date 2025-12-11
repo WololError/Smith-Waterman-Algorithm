@@ -3,11 +3,11 @@
 //calcule le score de Smith-Walterman entre une query et une protéine
 //blosum : matrice du substitution
 //GOP : gap opening penalty, GEP : gap extension penalty
-int SWmatrix(const query& query, const Protein& prot,const Blosum& blosum, const int GOP, const int GEP) {
+int SWmatrix(const string& query_string, const Protein& prot,const Blosum& blosum, const int GOP, const int GEP) {
     
     string prot_sequence = prot.getseq();
     int prot_len = prot_sequence.size();
-    string query_string = query.get_seq();
+    
     int query_len = query_string.size();
     
     //matrices H, F, E stockées en une dimension pour performance

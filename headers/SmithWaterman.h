@@ -10,6 +10,6 @@
 
 using namespace std;
 
-int SWmatrix(const query& query, const Protein& prot,const Blosum& blosum, const int GOP, const int GEP);
+int SWmatrix(const string& query, const Protein& prot,const Blosum& blosum, const int GOP, const int GEP);
 
 #endif

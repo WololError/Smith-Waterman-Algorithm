@@ -60,7 +60,7 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
         Protein P;
         P.id = read_header(phr, header_offsets[i],header_offsets[i + 1]);
         P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
-        P.sw_score = SWmatrix(query, P, blosum, GOP, GEP);
+        P.sw_score = SWmatrix(query.get_seq(), P, blosum, GOP, GEP);
         pq.push(P);
     }
 
@@ -94,7 +94,7 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
         Protein P;
         P.id = read_header(phr, header_offsets[i], header_offsets[i + 1]);
         P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
-        P.sw_score = SWmatrix(query, P, blosum, GOP, GEP);
+        P.sw_score = SWmatrix(query.get_seq(), P, blosum, GOP, GEP);
         //on ne garde que les TOP_K protéines
         if (thread_results.size() < TOP_K) {
             thread_results.push(move(P));
