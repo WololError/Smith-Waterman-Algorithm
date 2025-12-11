@@ -7,7 +7,8 @@ int SWmatrix(const query& query, const Protein& prot,const Blosum& blosum, const
     
     string prot_sequence = prot.getseq();
     int prot_len = prot_sequence.size();
-    int query_len = query.sequence.size();
+    string query_string = query.get_seq();
+    int query_len = query_string.size();
     
     //matrices H, F, E stockées en une dimension pour performance
     //H : score principal, E : gap horizontal, F : gap vertical
@@ -36,7 +37,7 @@ int SWmatrix(const query& query, const Protein& prot,const Blosum& blosum, const
             
             //score principal de Smith-Walterman
             H[i_curr] = max(0, 
-                max(H[(i-1)*(prot_len+1) + (j-1)] + blosum.Score(query.sequence[i-1], prot_sequence[j-1]), 
+                max(H[(i-1)*(prot_len+1) + (j-1)] + blosum.Score(query_string[i-1], prot_sequence[j-1]), 
                 max(E[i_curr], F[i_curr])));
 			
 			//mise à jour du score max

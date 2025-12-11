@@ -19,11 +19,15 @@ int main(int argc, char** argv){
     int GOP = atoi(argv[4]); // GOP = Gap Open Penalty
     int GEP = atoi(argv[5]); // GEP = Gap Extension Penalty
 
-    query query = getIdandsequence(fastafile);
-    dataPin pindata = read_pin(pinfile);
+    query query;
+    query.getIdandsequence(fastafile);
+
+    dataPin pindata;
+    pindata.read_pin(pinfile);
+
     Blosum scoring(blosumfile);
     
-    priority_queue<Protein> best20Prot = Protein::initProtqueue(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
+    priority_queue<Protein> best20Prot = Protein::initProtqueueMT(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
 
     Protein::print20best(best20Prot);
 

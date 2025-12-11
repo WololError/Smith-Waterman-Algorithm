@@ -11,12 +11,15 @@ vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfi
     ifstream psq(psqfile, ios::binary);
     if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .phr");
 
-    vector<Protein> proteins(pin.numberOfprot);
+    vector<Protein> proteins(pin.get_nop());
+
+    vector<uint32_t> sequence_offsets = pin.get_so();
+    vector<uint32_t> header_offsets = pin.get_ho();
 
 	//lecture des protéines via les offsets
-    for(int i = 0; i < pin.sequence_offsets.size() - 1 ; i++){
-        string p  = read_header(phr, pin.header_offsets[i],pin.header_offsets[i + 1]);
-        string seq = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
+    for(int i = 0; i < sequence_offsets.size() - 1 ; i++){
+        string p  = read_header(phr, header_offsets[i],header_offsets[i + 1]);
+        string seq = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
         proteins[i].id = p;
         proteins[i].sequence = seq;
     }
@@ -26,11 +29,11 @@ vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfi
     return proteins;
 }
 
-string Protein::getseq() const{
+const string& Protein::getseq() const{
     return this->sequence;
 }
 
-string Protein::getid() const{
+const string& Protein::getid() const{
     return this->id;
 }
 
@@ -49,11 +52,14 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
     
     priority_queue<Protein> pq;
 	
+    vector<uint32_t> sequence_offsets = pin.get_so();
+    vector<uint32_t> header_offsets = pin.get_ho();
+
 	//lecture de chaque protéine et calcul du score SW
-    for(int i = 0; i < pin.sequence_offsets.size() - 1 ; i++){    
+    for(int i = 0; i < sequence_offsets.size() - 1 ; i++){    
         Protein P;
-        P.id = read_header(phr, pin.header_offsets[i],pin.header_offsets[i + 1]);
-        P.sequence = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
+        P.id = read_header(phr, header_offsets[i],header_offsets[i + 1]);
+        P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
         P.sw_score = SWmatrix(query, P, blosum, GOP, GEP);
         pq.push(P);
     }
@@ -80,11 +86,14 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
     ifstream psq(psqfile, ios::binary);
     if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .psq");
 
+    vector<uint32_t> sequence_offsets = pin.get_so();
+    vector<uint32_t> header_offsets = pin.get_ho();
+
 	//parcours des protéines assignées a ce thread
     for (int i = start; i < end; ++i) {
         Protein P;
-        P.id = read_header(phr, pin.header_offsets[i], pin.header_offsets[i + 1]);
-        P.sequence = read_sequence(psq, pin.sequence_offsets[i], pin.sequence_offsets[i + 1]);
+        P.id = read_header(phr, header_offsets[i], header_offsets[i + 1]);
+        P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
         P.sw_score = SWmatrix(query, P, blosum, GOP, GEP);
         //on ne garde que les TOP_K protéines
         if (thread_results.size() < TOP_K) {
@@ -99,7 +108,7 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
 //initialise une priority_queue avec les meilleurs score de SW en multithreading
 priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP) {
     unsigned int num_threads = thread::hardware_concurrency();
-    int total_proteins = pin.numberOfprot;
+    int total_proteins = pin.get_nop();
     int chunk_size = total_proteins / num_threads;
     
     vector<priority_queue<Protein>> all_thread_results(num_threads);

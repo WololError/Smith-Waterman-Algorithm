@@ -1,13 +1,23 @@
 #include "../headers/fasta.h"
 //fonction qui lit une fichier fasta qui ne contient qu'une seul protéine et qui renvoie une objet de la structure Prot
 //qui servira à la représenter
-query getIdandsequence(const string& filefasta){
+
+const string& query::get_seq() const{
+    return this->sequence;
+}
+
+const string& query::get_id() const{
+    return this->id;
+}
+
+void query::getIdandsequence(const string& filefasta){
     ifstream fichier(filefasta);
     
     //verifie que le fichier est ouvert
     if (!fichier.good()) {
         std::cerr << "fichier fasta non ouvert" << std::endl;
-        return {"",""};
+        this->id = "";
+        this->sequence = "";
     }
 
     string ligne, id, sequence;
@@ -24,17 +34,15 @@ query getIdandsequence(const string& filefasta){
     }
     //construit l'objet query
     fichier.close();
-    query query;
-    query.id = id;
-    query.sequence = sequence;
-    return query;
+    this->id = id;
+    this->sequence = sequence;
 }
 
 //fonction qui cherche une séquence donnée dans un vecteur de protéines
-void findquery(const query q, const vector<Protein>& v){
+void query::findquery(const vector<Protein>& v){
     for(long unsigned int i = 0; i < v.size(); i++){
 		//si la séquence correspond à celle d'une protéine
-        if (q.sequence == v[i].getseq()){
+        if (this->sequence == v[i].getseq()){
             cout << v[i].getid() << endl; 
             break;
         }

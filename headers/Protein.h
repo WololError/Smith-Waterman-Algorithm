@@ -24,8 +24,8 @@ private:
     
 public:
     static vector<Protein> initProtlist(const string& phrfile, const string& psqfile, const dataPin pin);
-    string getseq() const;
-    string getid() const;
+    const string& getseq() const;
+    const string& getid() const;
     int getscore() const;
     
     bool operator< (const Protein &other) const {

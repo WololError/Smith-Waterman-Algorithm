@@ -8,11 +8,17 @@
 using namespace std;
 
 //structure qui représente une protéine
-struct query {
+class query {
+    
+private:
     string id;
     string sequence;
+
+public:
+    const string& get_id() const;
+    const string& get_seq() const;
+    void getIdandsequence(const string& files);
+    void findquery(const vector<Protein>& v);
 };
 
-query getIdandsequence(const string& files);
-void findquery(const query q, const vector<Protein>& v);
 #endif
