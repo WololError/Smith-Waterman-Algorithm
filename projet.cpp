@@ -27,7 +27,7 @@ int main(int argc, char** argv){
 
     Blosum scoring(blosumfile);
     
-    priority_queue<Protein> best20Prot = Protein::initProtqueueMT(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
+    priority_queue<Protein> best20Prot = Protein::initProtqueue(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
 
     Protein::print20best(best20Prot);
 
