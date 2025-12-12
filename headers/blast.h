@@ -4,9 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdint>
-#include <stdexcept>
 #include <vector>
-#include <map>
+
 using namespace std;
 
 // structure pr stocker les informarions intéressante du fichier pin

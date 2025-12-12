@@ -130,7 +130,10 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
 
         if (i == num_threads - 1) { end_index = total_proteins; } else { end_index = start_index + chunk_size; }   
 
-        if (start_index >= end_index) continue;
+        if (start_index >= end_index){
+            ++i;
+            continue;
+        } 
         //création du thread pour cette portion   
         workers.emplace_back(&Protein::computeSW, start_index, end_index, cref(query), cref(blosum), phrfile, psqfile, cref(pin), GEP, GOP, ref(all_thread_results[i]));
         ++i;

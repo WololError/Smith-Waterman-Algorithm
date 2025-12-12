@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include "Protein.h"
+
 using namespace std;
 
 //structure qui représente une protéine

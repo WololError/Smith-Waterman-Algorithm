@@ -3,14 +3,12 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdint>
-#include <stdexcept>
 #include <vector>
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <sstream>
-#include <iostream>
+
 using namespace std;
 
 class Blosum {
