@@ -85,17 +85,17 @@ void Protein::print20best(priority_queue<Protein>& pq){
 }
 
 //calcule les scores SW pour un intervalle de protéines pour le multithreading
-void Protein::computeSW(int start, int end, const query& query, const Blosum& blosum, const string& phrfile, const string& psqfile, const dataPin& pin, int GEP, int GOP, priority_queue<Protein>& thread_results) {
+void Protein::computeSW(int start, int end, const query& query, const Blosum& blosum, const string& phrfile, const string& psqfile, const dataPin& pin, int GEP, int GOP, priority_queue<Protein, vector<Protein>, Protein::CompareProteinScore>& thread_results) {
     const int TOP_K = 20;
     ifstream phr(phrfile, ios::binary);
     if (!phr) throw runtime_error("Impossible d'ouvrir le fichier .phr");
     ifstream psq(psqfile, ios::binary);
     if (!psq) throw runtime_error("Impossible d'ouvrir le fichier .psq");
 
-    vector<uint32_t> sequence_offsets = pin.get_so();
-    vector<uint32_t> header_offsets = pin.get_ho();
+    const vector<uint32_t>& sequence_offsets = pin.get_so(); 
+    const vector<uint32_t>& header_offsets = pin.get_ho();
 
-	//parcours des protéines assignées a ce thread
+    //parcours des protéines assignées a ce thread
     int i = start;
     while (i < end) {
         Protein P;
@@ -119,7 +119,7 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
     int total_proteins = pin.get_nop();
     int chunk_size = total_proteins / num_threads;
     
-    vector<priority_queue<Protein>> all_thread_results(num_threads);
+    vector<priority_queue<Protein, vector<Protein>, Protein::CompareProteinScore>> all_thread_results(num_threads);
     vector<thread> workers;
 
 	//lancement d'un thread par portion de protéines
@@ -145,12 +145,12 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
     }
 
     //fusion de toutes les queues 
-    priority_queue<Protein> final_pq = mergeQueues(all_thread_results);
+	priority_queue<Protein> final_pq = mergeQueues(all_thread_results);     
     return final_pq;
 }
 
 //fusionne plusieurs priority_queue en une seule
-priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein>>& all_queues) {
+priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein, vector<Protein>, Protein::CompareProteinScore>>& all_queues) {
     
     priority_queue<Protein> final_pq;
     
