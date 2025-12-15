@@ -1,6 +1,18 @@
-#include <iostream>
-#include <fstream>
-#include <chrono>
+/***********************************************************************
+ * Auteurs : ABDELLAOUI Sajid             |	587418
+ *			 BELONKONSKIY Alexandre		  |	586877
+ * 			 NAJDI Louai		          |	566950
+ *
+ * BA3 IRCI Bachelier en sciences de l'ingénieur, 
+ * orientation ingénieur civil (informatique)
+ * 
+ * Compléments de programmation et d'algorithmique
+ * 			Projet Alignement de séquences de protéines avec l’algorithme de Smith-Waterman
+ * 					INFO-H304
+ * 
+ * Professeur : ROLAND Jérémie
+ *
+ **********************************************************************/
 
 #include "headers/fasta.h"
 #include "headers/blast.h"
@@ -26,7 +38,7 @@ int main(int argc, char** argv){
     
     Blosum scoring(blosumfile);
 
-    priority_queue<Protein> best20Prot = Protein::initProtqueue(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
+    priority_queue<Protein> best20Prot = Protein::initProtqueueMT(phrfile, psqfile, pindata, query,scoring,GEP,GOP);
 
     Protein::print20best(best20Prot);
     
