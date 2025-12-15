@@ -2,7 +2,16 @@
 #include "../headers/blast.h"
 #include "../headers/SmithWaterman.h"
 
-//initialise la liste des protéines à partir des fichiers .phr et .psq
+/* Initialise la liste complète des protéines à partir des fichiers
+ * .phr et .psq. Les en-têtes et les séquences sont lus à l’aide
+ * des offsets fournis par l’objet dataPin.
+ *
+ * @param phrfile Chemin vers le fichier .phr.
+ * @param psqfile Chemin vers le fichier .psq.
+ * @param pin Objet dataPin contenant les offsets et le nombre de protéines.
+ *
+ * @return Vecteur contenant toutes les protéines de la base de données.
+ */
 vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfile, const dataPin pin){
     
     ifstream phr(phrfile, ios::binary);
@@ -31,19 +40,42 @@ vector<Protein> Protein::initProtlist(const string& phrfile, const string& psqfi
     return proteins;
 }
 
+/* Retourne la séquence de la protéine.
+ *
+ * @return Référence constante vers la séquence.
+ */
 const string& Protein::getseq() const{
     return this->sequence;
 }
 
+/* Retourne l’identifiant de la protéine.
+ *
+ * @return Référence constante vers l’identifiant.
+ */
 const string& Protein::getid() const{
     return this->id;
 }
 
+/* Retourne le score Smith-Waterman associé à la protéine.
+ *
+ * @return Score Smith-Waterman.
+ */
 int Protein::getscore() const{
     return this->sw_score;
 }
 
-//initialise une priority_queue avec les protéines et leurs scores SW par rapport a une query
+/* Initialise, de manière séquentielle, une priority_queue contenant les protéines triées selon leur score
+ *
+ * @param phrfile Chemin vers le fichier .phr.
+ * @param psqfile Chemin vers le fichier .psq.
+ * @param pin Objet dataPin contenant les offsets.
+ * @param query Protéine requête.
+ * @param blosum Objet Blosum utilisé pour la matrice de substitution.
+ * @param GEP Gap Extension Penalty.
+ * @param GOP Gap Opening Penalty.
+ *
+ * @return Priority_queue contenant les protéines triées en fonction de sw_score.
+ */
 priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP){
     
     ifstream phr(phrfile, ios::binary);
@@ -63,7 +95,7 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
         Protein P;
         P.id = read_header(phr, header_offsets[i],header_offsets[i + 1]);
         P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
-        P.sw_score = SWmatrix(query.get_seq(), P, blosum, GOP, GEP);
+        P.sw_score = SWmatrix(query.get_seq(), P.getseq(), blosum, GOP, GEP);
         pq.push(P);
         i++;
     }
@@ -73,18 +105,23 @@ priority_queue<Protein> Protein::initProtqueue(const string& phrfile, const stri
     return pq;
 }
 
-//affiche les 20 meilleures protéines
-void Protein::print20best(priority_queue<Protein>& pq){
-    int i = 0;
-    while (i < 20){
-        const Protein& p = pq.top();
-        cout << p.id << " " << p.sw_score << endl;
-        pq.pop();
-        i++;
-    }
-}
 
-//calcule les scores SW pour un intervalle de protéines pour le multithreading
+
+/* Calcule les scores Smith-Waterman pour un intervalle de protéines.
+ * Cette fonction est destinée à être exécutée dans un thread.
+ * Seules les TOP_K meilleures protéines sont conservées localement.
+ *
+ * @param start Indice de début dans la base de protéines.
+ * @param end Indice de fin dans la base de protéines.
+ * @param query Protéine requête.
+ * @param blosum Objet Blosum utilisé pour la matrice de substitution.
+ * @param phrfile Chemin vers le fichier .phr.
+ * @param psqfile Chemin vers le fichier .psq.
+ * @param pin Objet dataPin contenant les offsets.
+ * @param GEP Gap Extension Penalty.
+ * @param GOP Gap Opening Penalty.
+ * @param thread_results Priority_queue locale au thread.
+ */
 void Protein::computeSW(int start, int end, const query& query, const Blosum& blosum, const string& phrfile, const string& psqfile, const dataPin& pin, int GEP, int GOP, priority_queue<Protein, vector<Protein>, Protein::CompareProteinScore>& thread_results) {
     const int TOP_K = 20;
     ifstream phr(phrfile, ios::binary);
@@ -101,7 +138,7 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
         Protein P;
         P.id = read_header(phr, header_offsets[i], header_offsets[i + 1]);
         P.sequence = read_sequence(psq, sequence_offsets[i], sequence_offsets[i + 1]);
-        P.sw_score = SWmatrix(query.get_seq(), P, blosum, GOP, GEP);
+        P.sw_score = SWmatrix(query.get_seq(), P.getseq(), blosum, GOP, GEP);
         //on ne garde que les TOP_K protéines
         if (thread_results.size() < TOP_K) {
             thread_results.push(move(P));
@@ -113,7 +150,10 @@ void Protein::computeSW(int start, int end, const query& query, const Blosum& bl
     }
 }
 
-//initialise une priority_queue avec les meilleurs score de SW en multithreading
+/* Initialise une priority_queue  en utilisant le multithreading à l'aide de computeSW.
+ *
+ * @return Priority_queue contenant les protéines ayant les meilleurs scores.
+ */
 priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const string& psqfile, const dataPin& pin, const query& query, Blosum& blosum, int GEP, int GOP) {
     unsigned int num_threads = thread::hardware_concurrency();
     int total_proteins = pin.get_nop();
@@ -149,7 +189,13 @@ priority_queue<Protein> Protein::initProtqueueMT(const string& phrfile, const st
     return final_pq;
 }
 
-//fusionne plusieurs priority_queue en une seule
+
+/* Fusionne plusieurs priority_queue issues de différents threads en une seule priority_queue.
+ *
+ * @param all_queues Vecteur de priority_queue à fusionner.
+ *
+ * @return Priority_queue fusionnée.
+ */
 priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein, vector<Protein>, Protein::CompareProteinScore>>& all_queues) {
     
     priority_queue<Protein> final_pq;
@@ -162,4 +208,19 @@ priority_queue<Protein> Protein::mergeQueues(vector<priority_queue<Protein, vect
     }
     
     return final_pq;
+}
+
+
+/* Affiche les 20 protéines ayant les meilleurs scores Smith-Waterman.
+ *
+ * @param pq Priority_queue contenant les protéines triées par score.
+ */
+void Protein::print20best(priority_queue<Protein>& pq){
+    int i = 0;
+    while (i < 20){
+        const Protein& p = pq.top();
+        cout << p.id << " " << p.sw_score << endl;
+        pq.pop();
+        i++;
+    }
 }

@@ -1,5 +1,12 @@
 #include "../headers/blosum.h"
-//construit la matrice à partir du fichier en paramètre
+/* Construit un objet Blosum à partir d’un fichier BLOSUM.
+ * Le constructeur initialise entièrement l’objet en :
+ *  - déterminant la dimension de la matrice,
+ *  - associant chaque acide aminé à un index,
+ *  - remplissant la matrice de scores de substitution.
+ *
+ * @param blosumfile Chemin vers le fichier BLOSUM.
+ */
 Blosum::Blosum(const string& blosumfile) {
 	//lit la taille de la matrice
     this->size = parseBlosumSize(blosumfile);
@@ -31,9 +38,15 @@ Blosum::Blosum(const string& blosumfile) {
     file.close();
 }
 
-//retourne le score BLOSUM entre deux acide aminés
+/* Retourne le score de substitution BLOSUM entre deux acides aminés.
+ * Si un acide aminé n’est pas reconnu, il est remplacé par '*'.
+ *
+ * @param acide1 Premier acide aminé.
+ * @param acide2 Second acide aminé.
+ *
+ * @return Score BLOSUM correspondant à la paire d’acides aminés.
+ */
 int Blosum::Score(char acide1, char acide2) const {
-    //si un acide aminé est inconnue on remplace par *
     if (this->indexMap.count(acide1) == 0) {
         acide1 = '*';
     }
@@ -48,7 +61,14 @@ int Blosum::Score(char acide1, char acide2) const {
     return matrix[i * size + j];
 }
 
-//calcule la dimension de la matrice en comptant les lignes utiles du fichier
+/* Calcule la dimension de la matrice BLOSUM.
+ * La taille est déterminée en comptant les lignes utiles du fichier,
+ * en ignorant les lignes vides et les commentaires.
+ *
+ * @param blosumfile Chemin vers le fichier BLOSUM.
+ *
+ * @return Dimension de la matrice.
+ */
 int Blosum::parseBlosumSize(const string& blosumfile) const{
     ifstream file(blosumfile);
     if (!file) throw runtime_error("parseBlosumSize() : Impossible d'ouvrir le fichier");
@@ -66,7 +86,13 @@ int Blosum::parseBlosumSize(const string& blosumfile) const{
     return dimension;
 }
 
-//construit une map qui associe chaque acide aminé à son index dans la matrice
+/* Construit une table de correspondance entre chaque acide aminé
+ * et son index dans la matrice BLOSUM.
+ *
+ * @param blosumfile Chemin vers le fichier BLOSUM.
+ *
+ * @return Map associant chaque acide aminé à son index.
+ */
 unordered_map<char, int> Blosum::parseIndexMap(const string& blosumfile) const{
     ifstream file(blosumfile);
     if (!file) throw runtime_error("parseIndexMap() : impossible d'ouvrir le fichier");
@@ -87,7 +113,12 @@ unordered_map<char, int> Blosum::parseIndexMap(const string& blosumfile) const{
     return map;
 }
 
-//convertit une ligne contenant plusieurs entiers en un vecteur d'entiers
+/* Convertit une ligne contenant des valeurs numériques en vecteur d’entiers.
+ *
+ * @param line Ligne du fichier BLOSUM à convertir.
+ *
+ * @return Vecteur contenant les valeurs de la ligne.
+ */
 vector<int> Blosum::linetovector(string& line) {
 
     istringstream iss(line);
@@ -102,7 +133,8 @@ vector<int> Blosum::linetovector(string& line) {
     return vectorofnum;
 }
 
-//affiche la matrice BLOSUM
+/* Affiche la matrice BLOSUM sur la sortie standard.
+ */
 void Blosum::printMatrix() const {
     
     for (int i = 0; i < size; i++) {

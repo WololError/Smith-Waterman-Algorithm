@@ -2,19 +2,37 @@
 
 vector<char> Aminoacid = {'-', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z', 'U', '*', 'O', 'J'};
 
+/* Retourne le vecteur contenant les offsets des en-têtes dans le fichier .phr.
+ *
+ * @return Référence constante vers le vecteur des offsets des headers.
+ */
 const vector<uint32_t>& dataPin::get_ho() const{
     return this->header_offsets;
 }
 
+/* Retourne le vecteur contenant les offsets des séquences dans le fichier .psq.
+ *
+ * @return Référence constante vers le vecteur des offsets des séquences.
+ */
 const vector<uint32_t>& dataPin::get_so() const{
     return this->sequence_offsets;
 }
 
+/* Retourne le nombre total de protéines contenues dans la base de données.
+ *
+ * @return Nombre de protéines.
+ */
 int dataPin::get_nop() const{
     return this->numberOfprot;
 }
 
-//fonction qui inverse un entier sur 32bits vu que la plupart des données sont en big endian et que le processeur s'attend à du little endian
+/* Inverse l’ordre des octets d’un entier non signé sur 32 bits.
+ * Cette fonction est utilisée pour convertir des valeurs encodées
+ * en big endian vers le format little endian attendu par le processeur.
+ *
+ * @param val Valeur 32 bits à inverser.
+ * @return Valeur après inversion des octets.
+ */
 uint32_t swap(uint32_t val) {
     return ((((val) & 0xff000000) >> 24)|
       (((val) & 0x00ff0000) >>  8) |
@@ -22,8 +40,12 @@ uint32_t swap(uint32_t val) {
       (((val) & 0x000000ff) << 24));
 }
 
-//fonction qui return un objet dataPin contenant les info imporant d'un fichier .pin 
-//( nb de séquence et offsets pr les fichier .psd et .phr )
+/* Lit un fichier .pin et extrait les informations essentielles de la base BLAST.
+ * La fonction récupère notamment le nombre de séquences ainsi que les offsets
+ * des en-têtes et des séquences utilisés pour accéder aux fichiers .phr et .psq.
+ *
+ * @param filepin Chemin vers le fichier .pin à lire.
+ */
 void dataPin::read_pin(const string& filepin) {
     // ouvre le fichier en lecture binaire
     ifstream file(filepin, ios::binary);
@@ -97,13 +119,22 @@ void dataPin::read_pin(const string& filepin) {
     }
 }
 
+/* Lit une séquence protéique depuis un fichier .psq entre deux offsets.
+ * Chaque octet lu est converti en acide aminé à l’aide du tableau Aminoacid.
+ *
+ * @param file Flux du fichier .psq ouvert.
+ * @param a Offset de début de la séquence.
+ * @param b Offset de fin de la séquence.
+ *
+ * @return Chaîne de caractères représentant la séquence protéique.
+ */
 string read_sequence(ifstream& file, const int a,const int b){
     file.seekg(a, ios::beg);
     int size = llabs(b - a) ;
     string sequence;
     char byte;
     int value;
-    //on lit byte par byte puis on convertie les valeurs en lettrez avec le vector Aminoacid
+    //on lit byte par byte puis on convertie les valeurs en lettrez avec le tableau Aminoacid
     int i = 0;
     while (i < size - 1) {
         file.read(&byte, 1);
@@ -114,7 +145,16 @@ string read_sequence(ifstream& file, const int a,const int b){
     return sequence;
 }
 
-//fonction qui lit le fichier phr et qui renvoie l'identifint de la prot entre l'offset a et b
+/* Lit un en-tête protéique depuis un fichier .phr entre deux offsets.
+ * La fonction extrait les champs de type VisibleString et retourne
+ * l’identifiant principal de la protéine.
+ *
+ * @param file Flux du fichier .phr ouvert.
+ * @param a Offset de début de l’en-tête.
+ * @param b Offset de fin de l’en-tête.
+ *
+ * @return Identifiant de la protéine sous forme de chaîne de caractères.
+ */
 string read_header(ifstream& file, const int a, const int b) {
     file.seekg(a);
     int size = b - a;

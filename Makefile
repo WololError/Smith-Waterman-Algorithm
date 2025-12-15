@@ -1,15 +1,13 @@
 all: projet
 
 projetprelim: projetprelim.cpp
-	g++ projetprelim.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp -o projetprelim
+	g++ projetprelim.cpp src/* -o projetprelim
 
 projet: projet.cpp
-	g++ projet.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp src/SmithWaterman.cpp src/blosum.cpp -o projet
+	g++ projet.cpp src/* -o projet
 
 projetopt: projetopt.cpp
-	g++ -O3 -march=native -mtune=native -funroll-loops -ffast-math \
-    projetopt.cpp src/fasta.cpp src/blast.cpp src/Protein.cpp \
-    src/SmithWaterman.cpp src/blosum.cpp -o projet
+	g++ -O3 projetopt.cpp src/* -o projetopt
 
 clean:
 	rm *.o
