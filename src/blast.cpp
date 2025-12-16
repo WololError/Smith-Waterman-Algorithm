@@ -79,9 +79,7 @@ void dataPin::read_pin(const string& filepin) {
     file.read(reinterpret_cast<char*>(&timestamp_len), 4);
     timestamp_len = swap(timestamp_len);
 
-    //selon la documentation officiel, des bytes NULL sont ajouté de sorte que le nombre de séquence 
-    //commence à une offset multiple de 8 ce qui "augmente" le nb de bytes à skippe, 
-    //on calcule donc ce nb de bytes NULL (padding) puis on skip jusqu'au nb de séquence avec seekg
+    //on passe le timestamp
     file.seekg(timestamp_len, ios::cur);
 
     //on lit le nb de séquence et on l'inverse pr le récuperer plus tard
