@@ -8,7 +8,6 @@
 
 using namespace std;
 
-//structure qui représente une protéine
 class query {
     
 private:
