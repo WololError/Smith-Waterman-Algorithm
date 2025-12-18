@@ -1,13 +1,7 @@
 all: projet
 
 projetprelim: projetprelim.cpp
-	g++ projetprelim.cpp src/* -o projetprelim
-
-projet: projet.cpp
-	g++ projet.cpp src/* -o projet
-
-projetopt: projetopt.cpp
-	g++ -O3 projetopt.cpp src/* -o projetopt
+	g++ main.cpp src/* -o main
 
 clean:
 	rm *.o
