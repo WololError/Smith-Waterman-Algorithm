@@ -1,7 +1,8 @@
 all: projet
 
-projetprelim: projetprelim.cpp
+main: projetprelim.cpp
 	g++ main.cpp src/* -o main
 
 clean:
 	rm *.o
+
